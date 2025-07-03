@@ -1,6 +1,11 @@
 services:
   ldap:
-    image: ubccr/hpcts:ldap-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:ldap-${HPCTS_VERSION}
+    build:
+      context: ./ldap
+      args:
+        HPCTS_VERSION: "${HPCTS_VERSION}"
+        DOCKER_USER: "${DOCKER_USER}"
     hostname: ldap
     container_name: ldap
     environment:
@@ -10,15 +15,6 @@ services:
       - LDAP_TLS_VERIFY_CLIENT=never
     networks:
       - compute
-
-  base:
-    image: ubccr/hpcts:base-${HPCTS_VERSION}
-    build:
-      context: ./base
-    networks:
-      - compute
-    depends_on:
-      - ldap
 
   mysql:
     image: mariadb:${MARIADB_VERSION}
@@ -30,19 +26,41 @@ services:
       - compute
     volumes:
       - ./database:/docker-entrypoint-initdb.d
-      - ./database:/etc/mysql/conf.d
-      - ./slurm/slurmdbd.conf:/etc/slurm/slurmdbd.conf
       - var_lib_mysql:/var/lib/mysql
     expose:
       - "3306"
 
-  slurmdbd:
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+  base:
+    image: ${DOCKER_USER}:base-v2-${HPCTS_VERSION}
     build:
-      context: ./slurm
+      context: ./base-v2
       args:
-        SLURM_VERSION: $SLURM_VERSION
-        HPCTS_VERSION: $HPCTS_VERSION
+        HPCTS_VERSION: "${HPCTS_VERSION}"
+        DOCKER_USER: "${DOCKER_USER}"
+    networks:
+      - compute
+    volumes:
+      - etc_munge:/etc/munge
+    depends_on:
+      - ldap
+    command: >
+      bash -c "
+        if [ ! -f /etc/munge/munge.key ]; then
+          /usr/sbin/create-munge-key
+          chown munge:munge /etc/munge/munge.key
+          chmod 400 /etc/munge/munge.key
+        fi
+        exit 0
+      "
+
+  slurmdbd:
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
+    build:
+      context: ./slurm-v2
+      args:
+        SLURM_VERSION: "${SLURM_VERSION}"
+        HPCTS_VERSION: "${HPCTS_VERSION}"
+        DOCKER_USER: "${DOCKER_USER}"
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -51,7 +69,7 @@ services:
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
-      - slurmdbd_state:/var/lib/slurmd
+      - slurmdbd_state:/var/lib/slurm
     expose:
       - "22"
       - "6819"
@@ -61,7 +79,7 @@ services:
       - mysql
 
   slurmctld:
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
@@ -71,7 +89,7 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - home:/home
-      - slurmctld_state:/var/lib/slurmd
+      - slurmctld_state:/var/lib/slurm
     expose:
       - "22"
       - "6817"
@@ -81,7 +99,7 @@ services:
 
   cpn01:
     init: true
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmd"]
     hostname: cpn01
     container_name: cpn01
@@ -93,7 +111,7 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - home:/home
-      - cpn01_slurmd_state:/var/lib/slurmd
+      - cpn01_slurmd_state:/var/lib/slurm
     expose:
       - "22"
       - "6818"
@@ -103,7 +121,7 @@ services:
 
   cpn02:
     init: true
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmd"]
     hostname: cpn02
     container_name: cpn02
@@ -115,7 +133,7 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - home:/home
-      - cpn02_slurmd_state:/var/lib/slurmd
+      - cpn02_slurmd_state:/var/lib/slurm
     expose:
       - "22"
       - "6818"
@@ -124,7 +142,7 @@ services:
       - slurmctld
 
   frontend:
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["frontend"]
     hostname: frontend
     container_name: frontend
@@ -141,8 +159,12 @@ services:
       - slurmctld
 
   ondemand:
-    image: ubccr/hpcts:ondemand-2025.02
-    # TODO: Replace with gbuchanan/hpc-demo:ondemand-4.0 when ready
+    image: ${DOCKER_USER}:ondemand-v2-${HPCTS_VERSION}
+    build:
+      context: ./ondemand-v2
+      args:
+        HPCTS_VERSION: "${HPCTS_VERSION}"
+        DOCKER_USER: "${DOCKER_USER}"
     command: ["serve"]
     hostname: ondemand
     container_name: ondemand
