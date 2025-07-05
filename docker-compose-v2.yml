@@ -1,11 +1,6 @@
 services:
   ldap:
-    image: ${DOCKER_USER}:ldap-${HPCTS_VERSION}
-    build:
-      context: ./ldap
-      args:
-        HPCTS_VERSION: "${HPCTS_VERSION}"
-        DOCKER_USER: "${DOCKER_USER}"
+    image: ${DOCKER_USER}:ldap-v2-${HPCTS_VERSION}
     hostname: ldap
     container_name: ldap
     environment:
@@ -32,11 +27,6 @@ services:
 
   base:
     image: ${DOCKER_USER}:base-v2-${HPCTS_VERSION}
-    build:
-      context: ./base-v2
-      args:
-        HPCTS_VERSION: "${HPCTS_VERSION}"
-        DOCKER_USER: "${DOCKER_USER}"
     networks:
       - compute
     volumes:
@@ -55,12 +45,6 @@ services:
 
   slurmdbd:
     image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
-    build:
-      context: ./slurm-v2
-      args:
-        SLURM_VERSION: "${SLURM_VERSION}"
-        HPCTS_VERSION: "${HPCTS_VERSION}"
-        DOCKER_USER: "${DOCKER_USER}"
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -160,11 +144,6 @@ services:
 
   ondemand:
     image: ${DOCKER_USER}:ondemand-v2-${HPCTS_VERSION}
-    build:
-      context: ./ondemand-v2
-      args:
-        HPCTS_VERSION: "${HPCTS_VERSION}"
-        DOCKER_USER: "${DOCKER_USER}"
     command: ["serve"]
     hostname: ondemand
     container_name: ondemand
