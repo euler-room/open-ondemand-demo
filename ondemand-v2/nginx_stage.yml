@@ -1,0 +1,26 @@
+# OnDemand NGINX Stage Configuration
+#
+# Configure the nginx_stage for OnDemand
+
+# Directory where per-user nginx configs are stored
+pun_config_path: '/var/lib/ondemand-nginx/config/puns'
+
+# Directory for nginx staging
+pun_tmp_root: '/var/tmp/ondemand-nginx'
+
+# Directory for nginx logs
+pun_access_log_path: '/var/log/ondemand-nginx/%{user}/access.log'
+pun_error_log_path: '/var/log/ondemand-nginx/%{user}/error.log'
+
+# PUN socket path
+pun_socket_path: '/var/run/ondemand-nginx/%{user}/passenger.sock'
+
+# PUN process id path  
+pun_pid_path: '/var/run/ondemand-nginx/%{user}/passenger.pid'
+
+# Configure passenger
+passenger_log_level: 'warn'
+
+# User
+nginx_bin: '/usr/sbin/nginx'
+nginx_conf_path: '/var/lib/ondemand-nginx/config/nginx.conf'

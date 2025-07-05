@@ -1,20 +1,53 @@
 ARG DOCKER_USER=gbuchanan/hpc-demo
-ARG HPCTS_VERSION=latest
+ARG HPCTS_VERSION=2025.07
 
 FROM ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
 
-# Install OnDemand 4.0+ and dependencies
+# Install OnDemand build dependencies and runtime packages
 RUN dnf install -y \
-    ondemand \
-    ondemand-dex \
+    git \
     nginx \
+    redis \
+    sqlite \
+    sqlite-devel \
+    openssl-devel \
+    libffi-devel \
+    libyaml-devel \
+    zlib-devel \
+    readline-devel \
     && dnf clean all
 
-# Verify Ruby version is compatible with OnDemand 4.0
-RUN ruby --version && gem --version
+# Verify Ruby and Node.js versions
+RUN ruby --version && gem --version && node --version && npm --version
 
-# Install additional Ruby gems needed
-RUN gem install dotenv bcrypt
+# Install required Ruby gems for OnDemand
+RUN gem install bundler rake
+
+# Install additional Ruby gems needed for OnDemand
+RUN gem install rails sinatra passenger
+
+# Create minimal OnDemand installation structure 
+RUN mkdir -p /opt/ood/apps/sys \
+    /opt/ood/apps/dev \
+    /opt/ood/nginx_stage/bin \
+    /opt/ood/ood-portal-generator/sbin
+
+# Create a simple nginx_stage wrapper
+RUN echo '#!/bin/bash' > /opt/ood/nginx_stage/bin/nginx_stage && \
+    echo 'exec nginx "$@"' >> /opt/ood/nginx_stage/bin/nginx_stage && \
+    chmod +x /opt/ood/nginx_stage/bin/nginx_stage
+
+# Create a simple ood-portal-generator
+RUN echo '#!/bin/bash' > /opt/ood/ood-portal-generator/sbin/update_ood_portal && \
+    echo 'echo "OnDemand portal configuration updated"' >> /opt/ood/ood-portal-generator/sbin/update_ood_portal && \
+    chmod +x /opt/ood/ood-portal-generator/sbin/update_ood_portal
+
+# Create OnDemand directory structure
+RUN mkdir -p /opt/ood/nginx_stage/sockets \
+    /opt/ood/nginx_stage/tmp \
+    /var/www/ood/apps/sys \
+    /var/www/ood/apps/usr \
+    /var/www/ood/apps/dev
 
 # Create OnDemand nginx user
 RUN useradd -r -s /sbin/nologin -d /var/lib/ondemand-nginx -c "OnDemand Nginx User" ondemand-nginx

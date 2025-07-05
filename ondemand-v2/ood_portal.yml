@@ -1,0 +1,23 @@
+# OnDemand Portal Configuration
+#
+# Configure the port for OnDemand web interface
+listen_addr_port: 3443
+
+# Setup SSL - use self-signed certs for demo
+ssl:
+  - "SSLCertificateFile /etc/pki/tls/certs/localhost.crt"
+  - "SSLCertificateKeyFile /etc/pki/tls/private/localhost.key"
+
+# Disable mod_auth_openidc for simple demo
+auth:
+  - "AuthType basic"
+
+# Enable host regex for development
+host_regex: '*'
+
+# Set servername
+servername: localhost
+
+# Log level
+error_log_path: "/var/log/httpd/error.log"
+access_log_path: "/var/log/httpd/access.log"
