@@ -1,6 +1,6 @@
 services:
   ldap:
-    image: gbuchanan/hpc-demo:ldap-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:ldap-v2-${HPCTS_VERSION}
     hostname: ldap
     container_name: ldap
     environment:
@@ -10,13 +10,6 @@ services:
       - LDAP_TLS_VERIFY_CLIENT=never
     networks:
       - compute
-
-  base:
-    image: gbuchanan/hpc-demo:base-v2-${HPCTS_VERSION}
-    networks:
-      - compute
-    depends_on:
-      - ldap
 
   mysql:
     image: mariadb:${MARIADB_VERSION}
@@ -28,14 +21,30 @@ services:
       - compute
     volumes:
       - ./database:/docker-entrypoint-initdb.d
-      - ./database:/etc/mysql/conf.d
-      - ./slurm/slurmdbd.conf:/etc/slurm/slurmdbd.conf
       - var_lib_mysql:/var/lib/mysql
     expose:
       - "3306"
 
+  base:
+    image: ${DOCKER_USER}:base-v2-${HPCTS_VERSION}
+    networks:
+      - compute
+    volumes:
+      - etc_munge:/etc/munge
+    depends_on:
+      - ldap
+    command: >
+      bash -c "
+        if [ ! -f /etc/munge/munge.key ]; then
+          /usr/sbin/create-munge-key
+          chown munge:munge /etc/munge/munge.key
+          chmod 400 /etc/munge/munge.key
+        fi
+        exit 0
+      "
+
   slurmdbd:
-    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -44,7 +53,7 @@ services:
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
-      - slurmdbd_state:/var/lib/slurmd
+      - slurmdbd_state:/var/lib/slurm
     expose:
       - "22"
       - "6819"
@@ -54,7 +63,7 @@ services:
       - mysql
 
   slurmctld:
-    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
@@ -64,7 +73,7 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - home:/home
-      - slurmctld_state:/var/lib/slurmd
+      - slurmctld_state:/var/lib/slurm
     expose:
       - "22"
       - "6817"
@@ -74,7 +83,7 @@ services:
 
   cpn01:
     init: true
-    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmd"]
     hostname: cpn01
     container_name: cpn01
@@ -86,7 +95,7 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - home:/home
-      - cpn01_slurmd_state:/var/lib/slurmd
+      - cpn01_slurmd_state:/var/lib/slurm
     expose:
       - "22"
       - "6818"
@@ -96,7 +105,7 @@ services:
 
   cpn02:
     init: true
-    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["slurmd"]
     hostname: cpn02
     container_name: cpn02
@@ -108,7 +117,7 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - home:/home
-      - cpn02_slurmd_state:/var/lib/slurmd
+      - cpn02_slurmd_state:/var/lib/slurm
     expose:
       - "22"
       - "6818"
@@ -117,7 +126,7 @@ services:
       - slurmctld
 
   frontend:
-    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
     command: ["frontend"]
     hostname: frontend
     container_name: frontend
@@ -134,7 +143,7 @@ services:
       - slurmctld
 
   ondemand:
-    image: gbuchanan/hpc-demo:ondemand-v2-${HPCTS_VERSION}
+    image: ${DOCKER_USER}:ondemand-v2-${HPCTS_VERSION}
     command: ["serve"]
     hostname: ondemand
     container_name: ondemand

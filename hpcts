@@ -10,10 +10,10 @@ log_warn() {
 
 start() {
     log_info "Fetching latest HPC Toolset Images.."
-    docker compose -f docker-compose-v2.yml --env-file .env-v2 pull
+    docker compose pull
 
     log_info "Starting HPC Toolset Cluster.."
-    docker compose -f docker-compose-v2.yml --env-file .env-v2 up -d --no-build
+    docker compose up -d --no-build
 
     log_info "OnDemand URL: https://localhost:3443"
     log_info "SSH access: ssh -p 6222 hpcadmin@localhost (password: ilovelinux)"
@@ -21,14 +21,14 @@ start() {
 
 stop() {
     log_info "Stopping HPC Toolset Cluster containers.."
-    docker compose -f docker-compose-v2.yml --env-file .env-v2 stop
+    docker compose stop
 }
 
 destroy() {
     log_info "Stopping and removing HPC Toolset Cluster containers and volumes.."
-    docker compose -f docker-compose-v2.yml --env-file .env-v2 stop && \
-    docker compose -f docker-compose-v2.yml --env-file .env-v2 rm -f -v && \
-    docker compose -f docker-compose-v2.yml --env-file .env-v2 down -v
+    docker compose stop && \
+    docker compose rm -f -v && \
+    docker compose down -v
 }
 
 cleanup() {
