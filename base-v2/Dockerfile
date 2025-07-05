@@ -7,11 +7,7 @@ RUN dnf install -y https://yum.osc.edu/ondemand/4.0/ondemand-release-web-4.0-1.e
 RUN dnf install -y epel-release dnf-plugins-core && \
     dnf config-manager --set-enabled crb
 
-# Install Node.js 20 from NodeSource
-RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && \
-    dnf install -y nodejs
-
-# Install base system packages optimized for OnDemand 4.0
+# Install base system packages (without Node.js and Ruby - those will be added in specific images)
 RUN dnf install -y --allowerasing \
     git wget curl vim nano \
     openssl openssl-devel \
@@ -23,11 +19,6 @@ RUN dnf install -y --allowerasing \
     sudo which hostname \
     rsyslog systemd \
     && dnf clean all
-
-# Install Ruby 3.3+ from OnDemand repo (ensures compatibility)
-RUN dnf module enable -y ruby:3.3 && \
-    dnf install -y ruby ruby-devel ruby-libs \
-    rubygem-bundler rubygem-rake
 
 # Install additional development tools
 RUN dnf groupinstall -y "Development Tools" && \
