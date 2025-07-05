@@ -33,15 +33,15 @@ services:
       - etc_munge:/etc/munge
     depends_on:
       - ldap
-    command: >
-      bash -c "
+    command: |
+      bash -c '
         if [ ! -f /etc/munge/munge.key ]; then
           /usr/sbin/create-munge-key
           chown munge:munge /etc/munge/munge.key
           chmod 400 /etc/munge/munge.key
         fi
         exit 0
-      "
+      '
 
   slurmdbd:
     image: ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
@@ -67,6 +67,7 @@ services:
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
+    restart: unless-stopped
     networks:
       - compute
     volumes:
