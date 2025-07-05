@@ -1,7 +1,7 @@
 ARG DOCKER_USER=gbuchanan/hpc-demo
-ARG HPCTS_VERSION=latest
+ARG HPCTS_VERSION=2025.07
 
-FROM ${DOCKER_USER}:base-v2-${HPCTS_VERSION}
+FROM ${DOCKER_USER}:base-${HPCTS_VERSION}
 
 # Install SLURM dependencies
 RUN dnf install -y \
@@ -15,7 +15,14 @@ RUN dnf install -y \
     freeipmi-devel \
     hdf5-devel \
     man2html \
+    munge \
+    munge-devel \
     && dnf clean all
+
+# Install Ruby 3.3+ (needed for OnDemand)
+RUN dnf module enable -y ruby:3.3 && \
+    dnf install -y ruby ruby-devel ruby-libs \
+    rubygem-bundler rubygem-rake
 
 # Set SLURM version
 ARG SLURM_VERSION=24.05.7
@@ -46,7 +53,8 @@ RUN groupadd -r slurm && \
     chown slurm:slurm /var/spool/slurmd /var/log/slurm /var/lib/slurm
 
 # Install Python packages needed for SLURM
-RUN pip3 install PyMySQL
+RUN dnf install -y python3-pip && \
+    pip3 install PyMySQL
 
 # Copy SLURM configuration files
 COPY slurm.conf /etc/slurm/slurm.conf
