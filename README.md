@@ -16,7 +16,7 @@ The demo environment includes:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/gbuchanan/open-ondemand-demo.git
+   git clone https://github.com/euler-room/open-ondemand-demo.git
    cd open-ondemand-demo
    ```
 
