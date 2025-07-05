@@ -1,6 +1,6 @@
 services:
   ldap:
-    image: ubccr/hpcts:ldap-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:ldap-v2-${HPCTS_VERSION}
     hostname: ldap
     container_name: ldap
     environment:
@@ -12,7 +12,7 @@ services:
       - compute
 
   base:
-    image: ubccr/hpcts:base-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:base-v2-${HPCTS_VERSION}
     build:
       context: ./base
     networks:
@@ -37,7 +37,7 @@ services:
       - "3306"
 
   slurmdbd:
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
     build:
       context: ./slurm
       args:
@@ -61,7 +61,7 @@ services:
       - mysql
 
   slurmctld:
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
@@ -81,7 +81,7 @@ services:
 
   cpn01:
     init: true
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
     command: ["slurmd"]
     hostname: cpn01
     container_name: cpn01
@@ -103,7 +103,7 @@ services:
 
   cpn02:
     init: true
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
     command: ["slurmd"]
     hostname: cpn02
     container_name: cpn02
@@ -124,7 +124,7 @@ services:
       - slurmctld
 
   frontend:
-    image: ubccr/hpcts:slurm-${HPCTS_VERSION}
+    image: gbuchanan/hpc-demo:slurm-v2-${HPCTS_VERSION}
     command: ["frontend"]
     hostname: frontend
     container_name: frontend
@@ -141,8 +141,7 @@ services:
       - slurmctld
 
   ondemand:
-    image: ubccr/hpcts:ondemand-2025.02
-    # TODO: Replace with gbuchanan/hpc-demo:ondemand-4.0 when ready
+    image: gbuchanan/hpc-demo:ondemand-v2-${HPCTS_VERSION}
     command: ["serve"]
     hostname: ondemand
     container_name: ondemand

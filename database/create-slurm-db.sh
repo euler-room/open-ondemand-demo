@@ -3,11 +3,10 @@ set -e
 
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
-source /etc/slurm/slurmdbd.conf
-
-StorageLoc=${StorageLoc:-slurm_acct_db}
-StorageUser=${StorageUser:-slurm}
-StoragePass=${StoragePass:-ilovelinux}
+# Use hardcoded values that match slurmdbd.conf
+StorageLoc=slurm_acct_db
+StorageUser=slurm
+StoragePass=Ju6wreviap
 
 echo "Creating slurm accounting database.."
 mariadb -uroot <<EOF

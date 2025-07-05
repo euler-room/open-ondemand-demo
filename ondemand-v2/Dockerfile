@@ -3,78 +3,52 @@ ARG HPCTS_VERSION=2025.07
 
 FROM ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
 
-# Install OnDemand build dependencies and runtime packages
-RUN dnf install -y \
-    git \
-    nginx \
-    redis \
-    sqlite \
-    sqlite-devel \
-    openssl-devel \
-    libffi-devel \
-    libyaml-devel \
-    zlib-devel \
-    readline-devel \
+# Install OnDemand 4.0 from official RPM packages
+RUN dnf install -y https://yum.osc.edu/ondemand/4.0/ondemand-release-web-4.0-1.el9.noarch.rpm
+
+# Remove conflicting Node.js packages and repositories
+RUN dnf remove -y nodejs npm nodesource-release || true && \
+    rm -f /etc/yum.repos.d/nodesource*.repo && \
+    dnf clean all
+
+# Enable Node.js module and install OnDemand and dependencies
+RUN dnf module reset nodejs -y && \
+    dnf module enable nodejs:20 -y && \
+    dnf install -y --nogpgcheck ondemand ondemand-dex httpd mod_ssl
+
+# Install additional packages needed for OnDemand
+RUN dnf install -y netcat lsof sudo file rsync nmap-ncat \
+    libcurl-devel autoconf automake libtool openssl-devel \
+    jansson-devel libxml2-devel libxslt-devel gd-devel \
+    libaio-devel libyaml-devel nginx redis sqlite \
+    openssh-server openssh-clients \
     && dnf clean all
 
-# Verify Ruby and Node.js versions
-RUN ruby --version && gem --version && node --version && npm --version
+# Install Ruby gems needed by OnDemand
+RUN /usr/bin/gem install dotenv bcrypt rdoc
 
-# Install required Ruby gems for OnDemand
-RUN gem install bundler rake
-
-# Install additional Ruby gems needed for OnDemand
-RUN gem install rails sinatra passenger
-
-# Create minimal OnDemand installation structure 
-RUN mkdir -p /opt/ood/apps/sys \
-    /opt/ood/apps/dev \
-    /opt/ood/nginx_stage/bin \
-    /opt/ood/ood-portal-generator/sbin
-
-# Create a simple nginx_stage wrapper
-RUN echo '#!/bin/bash' > /opt/ood/nginx_stage/bin/nginx_stage && \
-    echo 'exec nginx "$@"' >> /opt/ood/nginx_stage/bin/nginx_stage && \
-    chmod +x /opt/ood/nginx_stage/bin/nginx_stage
-
-# Create a simple ood-portal-generator
-RUN echo '#!/bin/bash' > /opt/ood/ood-portal-generator/sbin/update_ood_portal && \
-    echo 'echo "OnDemand portal configuration updated"' >> /opt/ood/ood-portal-generator/sbin/update_ood_portal && \
-    chmod +x /opt/ood/ood-portal-generator/sbin/update_ood_portal
-
-# Create OnDemand directory structure
-RUN mkdir -p /opt/ood/nginx_stage/sockets \
-    /opt/ood/nginx_stage/tmp \
-    /var/www/ood/apps/sys \
-    /var/www/ood/apps/usr \
-    /var/www/ood/apps/dev
-
-# Create OnDemand nginx user
-RUN useradd -r -s /sbin/nologin -d /var/lib/ondemand-nginx -c "OnDemand Nginx User" ondemand-nginx
-
-# Set up OnDemand directories
-RUN mkdir -p \
-    /var/lib/ondemand-nginx/config/puns \
-    /var/lib/ondemand-nginx/config/apps/sys \
-    /var/lib/ondemand-nginx/config/apps/dev \
-    /var/lib/ondemand-nginx/config/apps/usr \
-    /var/log/ondemand-nginx \
-    /var/run/ondemand-nginx \
-    /var/tmp/ondemand-nginx \
-    /etc/ood/config/clusters.d \
-    /etc/ood/config/apps \
-    && touch /var/lib/ondemand-nginx/config/puns/.seq
+# Set up OnDemand directories and permissions
+RUN mkdir -p /var/lib/ondemand-nginx/config/puns && \
+    touch /var/lib/ondemand-nginx/config/puns/.seq && \
+    mkdir -p /var/log/ondemand-nginx && \
+    mkdir -p /var/run/ondemand-nginx && \
+    mkdir -p /var/tmp/ondemand-nginx && \
+    mkdir -p /etc/ood/config/clusters.d && \
+    mkdir -p /etc/ood/config/apps
 
 # Copy OnDemand configuration files
-COPY ood_portal.yml /etc/ood/config/ood_portal.yml
 COPY cluster-config.yml /etc/ood/config/clusters.d/hpc.yml
+COPY ood_portal.yml /etc/ood/config/ood_portal.yml
 COPY nginx_stage.yml /etc/ood/config/nginx_stage.yml
 
 # Copy custom apps and configurations
 COPY apps/ /var/www/ood/apps/sys/
 COPY config/ /etc/ood/config/
 
-# Set up SSL certificates
+# Set correct permissions for OnDemand apps
+RUN chmod 755 /var/www/ood/apps/sys/projects
+
+# Set up SSL certificates for HTTPS
 RUN mkdir -p /etc/pki/tls/certs /etc/pki/tls/private && \
     openssl req -new -x509 -nodes -out /etc/pki/tls/certs/localhost.crt \
     -keyout /etc/pki/tls/private/localhost.key -days 365 \
