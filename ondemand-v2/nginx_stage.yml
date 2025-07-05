@@ -18,9 +18,9 @@ pun_socket_path: '/var/run/ondemand-nginx/%{user}/passenger.sock'
 # PUN process id path  
 pun_pid_path: '/var/run/ondemand-nginx/%{user}/passenger.pid'
 
-# Configure passenger
-passenger_log_level: 'warn'
-
-# User
+# Nginx binary location
 nginx_bin: '/usr/sbin/nginx'
-nginx_conf_path: '/var/lib/ondemand-nginx/config/nginx.conf'
+
+# User mapping
+user_regex: '.*'
+min_uid: 1000
