@@ -1,44 +1,84 @@
-# HPC Toolset Tutorial
+# Open OnDemand Demo
 
-Tutorial for installing and configuring [ColdFront](http://coldfront.io), [Open OnDemand](https://openondemand.org/), and [Open XDMoD](https://open.xdmod.org): an HPC center management toolset.  
+This demo provides a complete HPC cluster environment with Open OnDemand 4.0+ web interface, SLURM job scheduler, and LDAP authentication, all running in Docker containers.
 
-### Presented by:
+## What's Included
 
-[![OSC Logo https://osc.edu](docs/osc_logo.png)](https://osc.edu)  
-[![CCR logo](docs/ccr_logo.jpg)](https://buffalo.edu/ccr)  
+The demo environment includes:
 
+* [Open OnDemand 4.0+](https://openondemand.org) - Full-featured web portal for HPC clusters
+* [SLURM](https://slurm.schedmd.com) - Workload manager and job scheduler 
+* [LDAP](https://www.openldap.org/) - Directory service for user authentication
+* [munge](https://dun.github.io/munge/) - SLURM authentication service
+* [Lmod](https://lmod.readthedocs.io) - Environment module system
 
-This tutorial aims to demonstrate how three open source applications work in concert to provide a toolset for high performance computing (HPC) centers. ColdFront is an allocations management portal that provides users an easy way to request access to allocations for a Center's resources.  HPC systems staff configure the data center’s resources with attributes that tie ColdFront’s plug-ins to systems such as job schedulers, authentication/account management systems, system monitoring, and Open XDMoD.  Once the user's allocation is activated in ColdFront, they are able to access the resource using Open OnDemand, a web-based portal for accessing HPC services that removes the complexities of HPC system environments from the end-user.  Through Open OnDemand, users can upload and download files, create, edit, submit and monitor jobs, create and share apps, run GUI applications and connect to a terminal, all via a web browser, with no client software to install and configure.  The Open XDMoD portal provides a rich set of features, which are tailored to the role of the user.  Sample metrics provided by Open XDMoD include: number of jobs, CPUs consumed, wait time, and wall time, with minimum, maximum and the average of these metrics. Performance and quality of service metrics of the HPC infrastructure are also provided, along with application specific performance metrics (flop/s, IO rates, network metrics, etc) for all user applications running on a given resource.  
+## Quick Start
 
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/gbuchanan/open-ondemand-demo.git
+   cd open-ondemand-demo
+   ```
 
-## Tutorial Steps
+2. **Start the demo:**
+   ```bash
+   ./hpcts start
+   ```
 
-[Requirements](docs/requirements.md)  
-[Getting Started](docs/getting_started.md)  
-[Accessing the Applications](docs/applications.md)  
-[ColdFront](/coldfront/README.md)  
-[Open OnDemand](/ondemand/README.md)  
-[Open XDMoD](/xdmod/README.md)  
+3. **Access the services:**
+   - **OnDemand Web Interface**: https://localhost:3443
+   - **SSH Access**: `ssh -p 6222 hpcadmin@localhost` (password: ilovelinux)
 
-[Acknowledgments](docs/acknowledgments.md)
+## Services & Architecture
 
+- **Frontend Node**: SSH access point and job submission
+- **Compute Nodes**: cpn01, cpn02 - SLURM worker nodes
+- **OnDemand Node**: Web portal with full OnDemand functionality
+- **SLURM Controller**: slurmctld and slurmdbd services
+- **LDAP**: User directory and authentication
+- **MySQL**: Database backend for SLURM accounting
 
-## Workshops
-This tutorial, in full or in part, has been presented at the following conferences:
+## Management Commands
 
-[Global OnDemand 2025](https://www.conference2025.openondemand.org/)  
-[Gateways 2024](https://sciencegateways.org/gateways2024-program)  
-[Gateways 2023](https://sciencegateways.org/gateways2023-program)  
-[PEARC23](https://pearc.acm.org/pearc23/)  
-[ISC23](https://www.isc-hpc.com/)  
-[Gateways 2022](https://sciencegateways.org/gateways2022-program)  
-[PEARC22](https://pearc.acm.org/pearc22)  
-[Gateways 2021](https://sciencegateways.org/gateways2021-program)  
-[PEARC21](https://pearc.acm.org/pearc21)  
-[PEARC20](https://pearc.acm.org/pearc20/)  
-[Gateways 2020](https://sciencegateways.org/web/gateways2020)
+```bash
+./hpcts start     # Start all services
+./hpcts stop      # Stop all services
+./hpcts destroy   # Stop and remove containers/volumes
+./hpcts cleanup   # Remove images (requires confirmation)
+```
 
-This [overview of HPC Toolset Tutorial](https://www.youtube.com/watch?v=9Nf1GucaVc0) is provided as context to those finding this repo and wanting to go through the hands-on tutorial without attending the full day workshop at a conference.
+## Docker Images
+
+All images are available on DockerHub:
+- `gbuchanan/hpc-demo:base-v2-2025.07`
+- `gbuchanan/hpc-demo:ldap-v2-2025.07`
+- `gbuchanan/hpc-demo:slurm-v2-2025.07`
+- `gbuchanan/hpc-demo:ondemand-v2-2025.07`
+
+## User Accounts
+
+Pre-configured LDAP users:
+- **hpcadmin** (admin user)
+- **cgray** (regular user)
+- **sfoster** (regular user)
+- **ccampbell** (regular user)
+
+All users have the password: `ilovelinux`
+
+## OnDemand Features
+
+The demo includes a fully functional OnDemand instance with:
+- Job submission and monitoring
+- File management
+- Interactive applications
+- Shell access
+- Job templates and workflows
+
+## System Requirements
+
+- Docker and Docker Compose
+- 8GB+ RAM recommended
+- 20GB+ disk space for images and data
 
 ## Disclaimer
 
@@ -49,4 +89,9 @@ testing and learning only.
 
 ## License
 
-This tutorial is released under the GPLv3 license. See the LICENSE file.
+This project is released under the GPLv3 license. See the LICENSE file.
+
+## Based On
+
+This demo is derived from the [HPC Toolset Tutorial](https://github.com/ubccr/hpc-toolset-tutorial) 
+by University at Buffalo CCR and Ohio Supercomputer Center.
