@@ -40,7 +40,6 @@ EOF
 
     log_info "OnDemand URL: https://localhost:3443"
     log_info "SSH access: ssh -F .ssh/config frontend (password: ilovelinux)"
-    log_info "Alternative: ssh -o UserKnownHostsFile=$(pwd)/.ssh/known_hosts -o StrictHostKeyChecking=no -p 6222 hpcadmin@localhost"
 }
 
 stop() {

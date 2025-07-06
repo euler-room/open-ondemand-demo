@@ -73,7 +73,7 @@ Starting HPC Toolset Cluster..
  XDMoD URL: https://localhost:4443
 
 
- Login to frontend: ssh -p 6222 hpcadmin@localhost
+ Login to frontend: ssh -F .ssh/config frontend
 
 ```
 

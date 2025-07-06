@@ -21,7 +21,7 @@ Default password for all accounts (except cgray): `ilovelinux`
 
 Login to frontend via SSH and user: `hpcadmin` password: `ilovelinux`:
 ```
-ssh -p 6222 hpcadmin@localhost
+ssh -F .ssh/config frontend
 ```  
 **NOTE: You must login to the front end before trying to login to any of the other containers!**
 
@@ -75,7 +75,7 @@ Local administrator account (see below)
 There is a slurm controller, slurm database container, and two compute nodes in this cluster.
 
 Login to the front end first:
-`ssh -p 6222 hpcadmin@localhost`
+`ssh -F .ssh/config frontend`
 
 Then login to any of the containers using any of the LDAP accounts listed above.  
 

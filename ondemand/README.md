@@ -559,7 +559,7 @@ You'll also need to setup `git` for the hpcadmin user at this point, so let's go
 and make first commit to the jupyter app as the starting point.
 
 ```shell
-git config --global user.email hpcadmin@localhost
+git config --global user.email hpcadmin@example.com
 git config --global user.name "HPC Admin"
 cd ~/ondemand/dev/jupyter
 git add .
