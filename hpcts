@@ -16,6 +16,9 @@ ssh_cleanup() {
 }
 
 start() {
+    # Clean up any existing SSH configuration first
+    ssh_cleanup
+    
     log_info "Fetching latest HPC Toolset Images.."
     docker compose pull
 
