@@ -15,8 +15,24 @@ start() {
     log_info "Starting HPC Toolset Cluster.."
     docker compose up -d --no-build
 
+    # Create project-specific SSH configuration
+    mkdir -p .ssh
+    cat > .ssh/config << EOF
+Host hpc-demo
+    HostName localhost
+    Port 6222
+    User hpcadmin
+    StrictHostKeyChecking no
+    UserKnownHostsFile $(pwd)/.ssh/known_hosts
+    LogLevel ERROR
+EOF
+    chmod 600 .ssh/config
+    touch .ssh/known_hosts
+    chmod 600 .ssh/known_hosts
+
     log_info "OnDemand URL: https://localhost:3443"
-    log_info "SSH access: ssh -p 6222 hpcadmin@localhost (password: ilovelinux)"
+    log_info "SSH access: ssh -F .ssh/config hpc-demo (password: ilovelinux)"
+    log_info "Alternative: ssh -o UserKnownHostsFile=$(pwd)/.ssh/known_hosts -o StrictHostKeyChecking=no -p 6222 hpcadmin@localhost"
 }
 
 stop() {
@@ -29,6 +45,12 @@ destroy() {
     docker compose stop && \
     docker compose rm -f -v && \
     docker compose down -v
+    
+    # Clean up project-specific SSH files
+    if [ -d ".ssh" ]; then
+        log_info "Cleaning up project SSH configuration.."
+        rm -rf .ssh
+    fi
 }
 
 cleanup() {
