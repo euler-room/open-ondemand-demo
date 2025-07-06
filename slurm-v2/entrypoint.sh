@@ -50,7 +50,8 @@ case "$1" in
         ;;
     frontend)
         echo "Starting frontend (SSH)..."
-        /usr/sbin/sshd-keygen -A 2>/dev/null || true
+        mkdir -p /etc/ssh
+        ssh-keygen -A 2>/dev/null || true
         exec /usr/sbin/sshd -D
         ;;
     *)
