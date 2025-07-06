@@ -8,6 +8,13 @@ log_warn() {
   printf "\e[0;33m $1\e[0m\n"
 }
 
+ssh_cleanup() {
+    if [ -d ".ssh" ]; then
+        log_info "Cleaning up project SSH configuration.."
+        rm -rf .ssh
+    fi
+}
+
 start() {
     log_info "Fetching latest HPC Toolset Images.."
     docker compose pull
@@ -46,11 +53,7 @@ destroy() {
     docker compose rm -f -v && \
     docker compose down -v
     
-    # Clean up project-specific SSH files
-    if [ -d ".ssh" ]; then
-        log_info "Cleaning up project SSH configuration.."
-        rm -rf .ssh
-    fi
+    ssh_cleanup
 }
 
 cleanup() {
@@ -65,8 +68,11 @@ cleanup() {
         docker rmi $(docker images -f "reference=gbuchanan/hpc-demo*" -q) 2>/dev/null || true
         # Also clean up legacy ubccr/hpcts images if they exist
         docker rmi $(docker images -f "reference=ubccr/hpcts*" -q) 2>/dev/null || true
+        
+        # Ensure SSH files are cleaned up even if destroy had issues
+        ssh_cleanup
     else
-        log_info "cleanup cancelled. existing.."
+        log_info "cleanup cancelled. exiting.."
     fi
 }
 
