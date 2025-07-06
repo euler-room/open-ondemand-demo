@@ -89,16 +89,6 @@ fi
 
 if [ "$1" = "frontend" ]
 then
-    echo "---> Creating hpcadmin user for demo environment ..."
-    # Create local hpcadmin user to bypass LDAP/SSSD authentication complexity for demo
-    if ! id hpcadmin &>/dev/null; then
-        useradd -m -s /bin/bash hpcadmin
-        echo "hpcadmin:ilovelinux" | chpasswd
-        echo "Created user: hpcadmin"
-    else
-        echo "User hpcadmin already exists"
-    fi
-
     echo "---> Starting SSSD ..."
     # Sometimes on shutdown pid still exists, so delete it
     rm -f /var/run/sssd.pid
@@ -118,6 +108,9 @@ then
         echo "Creating slurm associations.."
         sacctmgr -i add account staff Cluster=hpc Description=staff
         sacctmgr -i add user hpcadmin DefaultAccount=staff AdminLevel=Admin
+        sacctmgr -i add account sfoster Cluster=hpc Description="PI account sfoster"
+        sacctmgr -i add user sfoster DefaultAccount=sfoster
+        sacctmgr -i add user astewart DefaultAccount=sfoster
         scontrol reconfigure
     fi
 

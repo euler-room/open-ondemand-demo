@@ -3,7 +3,7 @@
 - Coldfront: https://localhost:2443
 - OnDemand: https://localhost:3443
 - XDMoD: https://localhost:4443
-- Login to frontend: `ssh -F .ssh/config frontend`
+- Login to frontend: `ssh -p 6222 hpcadmin@localhost`
 - GitHub Repo: https://github.com/ubccr/hpc-toolset-tutorial
 - Accounts: https://github.com/ubccr/hpc-toolset-tutorial/blob/master/docs/applications.md
 - OnDemand Tutorial: https://github.com/ubccr/hpc-toolset-tutorial/blob/master/ondemand/README.md
