@@ -68,6 +68,8 @@ cleanup() {
         docker rmi $(docker images -f "reference=gbuchanan/hpc-demo*" -q) 2>/dev/null || true
         # Also clean up legacy ubccr/hpcts images if they exist
         docker rmi $(docker images -f "reference=ubccr/hpcts*" -q) 2>/dev/null || true
+        # Remove MariaDB image for complete cleanup
+        docker rmi $(docker images -f "reference=mariadb*" -q) 2>/dev/null || true
         
         # Ensure SSH files are cleaned up even if destroy had issues
         ssh_cleanup
