@@ -57,6 +57,12 @@ services:
     expose:
       - "22"
       - "6819"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "timeout 2 bash -c '</dev/tcp/localhost/6819' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     depends_on:
       - base
       - ldap
@@ -79,8 +85,10 @@ services:
       - "22"
       - "6817"
     depends_on:
-      - ldap
-      - slurmdbd
+      slurmdbd:
+        condition: service_healthy
+      ldap:
+        condition: service_started
 
   cpn01:
     init: true

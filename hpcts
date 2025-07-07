@@ -8,12 +8,42 @@ log_warn() {
   printf "\e[0;33m $1\e[0m\n"
 }
 
+ssh_cleanup() {
+    if [ -d ".ssh" ]; then
+        log_info "Cleaning up project SSH configuration.."
+        rm -rf .ssh
+    fi
+}
+
 start() {
+    # Clean up any existing SSH configuration first
+    ssh_cleanup
+    
     log_info "Fetching latest HPC Toolset Images.."
+    # Remove any existing global SSH host key for localhost:6222 to prevent conflicts
+    log_info "Cleaning up any existing SSH host keys for localhost:6222.."
+    ssh-keygen -R "[localhost]:6222" 2>/dev/null || true
+    
     docker compose pull
 
     log_info "Starting HPC Toolset Cluster.."
     docker compose up -d --no-build
+
+    # Create project-specific SSH configuration
+    mkdir -p .ssh
+    cat > .ssh/config <<EOF
+Host frontend
+    HostName localhost
+    Port 6222
+    User hpcadmin
+    StrictHostKeyChecking no
+    UserKnownHostsFile $(pwd)/.ssh/known_hosts
+    LogLevel ERROR
+    PasswordAuthentication yes
+EOF
+    chmod 600 .ssh/config
+    touch .ssh/known_hosts
+    chmod 600 .ssh/known_hosts
 
     log_info "OnDemand URL: https://localhost:3443"
     log_info "SSH access: ssh -p 6222 hpcadmin@localhost (password: ilovelinux)"
@@ -29,6 +59,8 @@ destroy() {
     docker compose stop && \
     docker compose rm -f -v && \
     docker compose down -v
+    
+    ssh_cleanup
 }
 
 cleanup() {
@@ -43,8 +75,13 @@ cleanup() {
         docker rmi $(docker images -f "reference=gbuchanan/hpc-demo*" -q) 2>/dev/null || true
         # Also clean up legacy ubccr/hpcts images if they exist
         docker rmi $(docker images -f "reference=ubccr/hpcts*" -q) 2>/dev/null || true
+        # Remove MariaDB image for complete cleanup
+        docker rmi $(docker images -f "reference=mariadb*" -q) 2>/dev/null || true
+        
+        # Ensure SSH files are cleaned up even if destroy had issues
+        ssh_cleanup
     else
-        log_info "cleanup cancelled. existing.."
+        log_info "cleanup cancelled. exiting.."
     fi
 }
 

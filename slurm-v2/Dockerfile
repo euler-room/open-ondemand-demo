@@ -1,7 +1,7 @@
 ARG DOCKER_USER=gbuchanan/hpc-demo
 ARG HPCTS_VERSION=2025.07
 
-FROM ${DOCKER_USER}:base-${HPCTS_VERSION}
+FROM ${DOCKER_USER}:base-v2-${HPCTS_VERSION}
 
 # Install SLURM dependencies
 RUN dnf install -y \

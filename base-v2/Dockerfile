@@ -18,7 +18,12 @@ RUN dnf install -y --allowerasing \
     sssd sssd-client \
     sudo which hostname \
     rsyslog systemd \
+    openssh-server openssh-clients \
     && dnf clean all
+
+# Install gosu from GitHub releases
+RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/download/1.17/gosu-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" \
+    && chmod +x /usr/local/bin/gosu
 
 # Install additional development tools
 RUN dnf groupinstall -y "Development Tools" && \

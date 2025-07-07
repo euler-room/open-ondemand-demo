@@ -7,10 +7,15 @@ listen_addr_port: 3443
 ssl:
   - "SSLCertificateFile /etc/pki/tls/certs/localhost.crt"
   - "SSLCertificateKeyFile /etc/pki/tls/private/localhost.key"
+  - "SSLEngine on"
 
-# Disable mod_auth_openidc for simple demo
+# Use LDAP authentication (same as SSH)
 auth:
-  - "AuthType basic"
+  - "AuthType Basic"
+  - "AuthName \"OnDemand\""
+  - "AuthBasicProvider ldap"
+  - "AuthLDAPURL ldap://ldap:389/ou=People,dc=example,dc=org?uid"
+  - "Require valid-user"
 
 # Enable host regex for development
 host_regex: '*'

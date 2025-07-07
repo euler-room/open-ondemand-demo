@@ -27,6 +27,19 @@ chown slurm:slurm /etc/slurm/slurmdbd.conf 2>/dev/null || true
 echo "Starting SSSD..."
 /usr/sbin/sssd -D
 
+# Create local demo users for SSH access (demo environment only)
+echo "Creating demo users for SSH access..."
+for user in hpcadmin cgray sfoster csimmons astewart; do
+    if ! id "$user" &>/dev/null; then
+        useradd -m -s /bin/bash "$user"
+        echo "$user:ilovelinux" | chpasswd
+        # Set special password for cgray
+        if [ "$user" = "cgray" ]; then
+            echo "cgray:test123" | chpasswd
+        fi
+    fi
+done
+
 # Start MUNGE with proper user context
 echo "Starting MUNGE..."
 gosu munge /usr/sbin/munged &
@@ -50,7 +63,8 @@ case "$1" in
         ;;
     frontend)
         echo "Starting frontend (SSH)..."
-        /usr/sbin/sshd-keygen -A 2>/dev/null || true
+        mkdir -p /etc/ssh
+        ssh-keygen -A 2>/dev/null || true
         exec /usr/sbin/sshd -D
         ;;
     *)
