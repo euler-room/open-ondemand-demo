@@ -20,6 +20,10 @@ start() {
     ssh_cleanup
     
     log_info "Fetching latest HPC Toolset Images.."
+    # Remove any existing global SSH host key for localhost:6222 to prevent conflicts
+    log_info "Cleaning up any existing SSH host keys for localhost:6222.."
+    ssh-keygen -R "[localhost]:6222" 2>/dev/null || true
+    
     docker compose pull
 
     log_info "Starting HPC Toolset Cluster.."
@@ -27,7 +31,7 @@ start() {
 
     # Create project-specific SSH configuration
     mkdir -p .ssh
-    cat > .ssh/config << EOF
+    cat > .ssh/config <<EOF
 Host frontend
     HostName localhost
     Port 6222
