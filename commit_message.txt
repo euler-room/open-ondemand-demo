@@ -1,0 +1,32 @@
+Upgrade Open OnDemand to 4.0+ on Rocky Linux 9 with simplified architecture
+
+Major Changes:
+- Upgraded base OS from CentOS to Rocky Linux 9
+- Upgraded Open OnDemand from 3.x to 4.0.5
+- Removed XDMoD and ColdFront dependencies completely
+- Switched from LDAP to file-based authentication for simplicity
+
+Technical Fixes:
+- Added ondemand-dex package to Dockerfile for authentication service
+- Fixed MUNGE directory permissions in entrypoint script
+- Made Dex authentication service optional (using file-based auth instead)
+- Fixed nginx_stage configuration:
+  - Corrected pun_config_path to use file pattern instead of directory
+  - Updated nginx binary path to /opt/rh/ondemand/root/usr/sbin/nginx
+- Added local user creation in ondemand container
+- Created htpasswd file for Apache Basic authentication
+- Added LDAP environment variables to docker-compose.yml
+
+Documentation Updates:
+- Updated README.md to reflect file-based authentication
+- Created SETUP_NOTES.md with detailed setup and troubleshooting guide
+- Removed all references to XDMoD and ColdFront from:
+  - docs/acknowledgments.md
+  - docs/applications.md
+  - docs/getting_started.md
+  - docs/docker_tips.md
+- Updated user account information in documentation
+- Emphasized use of ./hpcts script for managing the environment
+
+The demo environment now starts cleanly with './hpcts start' and provides
+a fully functional Open OnDemand 4.0+ interface without external dependencies.

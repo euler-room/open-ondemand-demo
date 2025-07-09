@@ -57,8 +57,6 @@ $ docker compose up -d
 
 # Display Tutorial Container Logs
 $ docker compose logs -f
-$ docker compose logs -f coldfront
-$ docker compose logs -f xdmod
 $ docker compose logs -f ondemand
 
 # Stop containers 
@@ -83,7 +81,7 @@ $ docker image list
 $ docker volume list
 
 # Finding IP address of container
-$ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' coldfront
+$ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ondemand
 172.27.0.10
 ```
 
