@@ -1,6 +1,6 @@
 # Open OnDemand Demo
 
-This demo provides a complete HPC cluster environment with Open OnDemand 4.0+ web interface, SLURM job scheduler, and LDAP authentication, all running in Docker containers.
+This demo provides a complete HPC cluster environment with Open OnDemand 4.0+ web interface, SLURM job scheduler, and file-based authentication, all running in Docker containers.
 
 ## What's Included
 
@@ -57,13 +57,12 @@ All images are available on DockerHub:
 
 ## User Accounts
 
-Pre-configured LDAP users:
-- **hpcadmin** (admin user)
-- **cgray** (regular user)
-- **sfoster** (regular user)
-- **ccampbell** (regular user)
-
-All users have the password: `ilovelinux`
+Pre-configured demo users:
+- **hpcadmin** (admin user) - password: `ilovelinux`
+- **cgray** (regular user) - password: `test123`
+- **sfoster** (regular user) - password: `ilovelinux`
+- **csimmons** (regular user) - password: `ilovelinux`
+- **astewart** (regular user) - password: `ilovelinux`
 
 ## OnDemand Features
 

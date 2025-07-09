@@ -3,7 +3,7 @@
 # Configure the nginx_stage for OnDemand
 
 # Directory where per-user nginx configs are stored
-pun_config_path: '/var/lib/ondemand-nginx/config/puns'
+pun_config_path: '/var/lib/ondemand-nginx/config/puns/%{user}.conf'
 
 # Directory for nginx staging
 pun_tmp_root: '/var/tmp/ondemand-nginx'
@@ -19,7 +19,7 @@ pun_socket_path: '/var/run/ondemand-nginx/%{user}/passenger.sock'
 pun_pid_path: '/var/run/ondemand-nginx/%{user}/passenger.pid'
 
 # Nginx binary location
-nginx_bin: '/usr/sbin/nginx'
+nginx_bin: '/opt/rh/ondemand/root/usr/sbin/nginx'
 
 # User mapping
 user_regex: '.*'

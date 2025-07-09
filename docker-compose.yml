@@ -8,6 +8,9 @@ services:
       - LDAP_RFC2307BIS_SCHEMA=true
       - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
       - LDAP_TLS_VERIFY_CLIENT=never
+      - LDAP_DOMAIN=example.org
+      - LDAP_ORGANISATION=Example Organization
+      - LDAP_ADMIN_PASSWORD=admin
     networks:
       - compute
 

@@ -3,38 +3,30 @@ ARG HPCTS_VERSION=2025.07
 
 FROM ${DOCKER_USER}:slurm-v2-${HPCTS_VERSION}
 
-# Install OnDemand 4.0 from official RPM packages
+# Follow the official OnDemand installation documentation
+# Install OnDemand 4.0 release repository
 RUN dnf install -y https://yum.osc.edu/ondemand/4.0/ondemand-release-web-4.0-1.el9.noarch.rpm
 
-# Remove conflicting Node.js packages and repositories
-RUN dnf remove -y nodejs npm nodesource-release || true && \
-    rm -f /etc/yum.repos.d/nodesource*.repo && \
-    dnf clean all
-
-# Enable Node.js module and install OnDemand and dependencies
+# Install OnDemand with all required dependencies according to documentation
 RUN dnf module reset nodejs -y && \
     dnf module enable nodejs:20 -y && \
-    dnf install -y --nogpgcheck ondemand ondemand-dex httpd mod_ssl
+    dnf install -y --nogpgcheck ondemand ondemand-dex httpd mod_ssl python3-websockify && \
+    dnf clean all
 
-# Install additional packages needed for OnDemand
+# Install additional packages for HPC demo environment
 RUN dnf install -y netcat lsof sudo file rsync nmap-ncat \
-    libcurl-devel autoconf automake libtool openssl-devel \
-    jansson-devel libxml2-devel libxslt-devel gd-devel \
-    libaio-devel libyaml-devel nginx redis sqlite \
     openssh-server openssh-clients \
     && dnf clean all
 
-# Install Ruby gems needed by OnDemand
-RUN /usr/bin/gem install dotenv bcrypt rdoc
-
-# Set up OnDemand directories and permissions
+# Set up OnDemand directories according to documentation
 RUN mkdir -p /var/lib/ondemand-nginx/config/puns && \
     touch /var/lib/ondemand-nginx/config/puns/.seq && \
     mkdir -p /var/log/ondemand-nginx && \
     mkdir -p /var/run/ondemand-nginx && \
     mkdir -p /var/tmp/ondemand-nginx && \
     mkdir -p /etc/ood/config/clusters.d && \
-    mkdir -p /etc/ood/config/apps
+    mkdir -p /etc/ood/config/apps && \
+    mkdir -p /var/run/passenger-instreg
 
 # Copy OnDemand configuration files
 COPY cluster-config.yml /etc/ood/config/clusters.d/hpc.yml
@@ -54,7 +46,7 @@ RUN mkdir -p /etc/pki/tls/certs /etc/pki/tls/private && \
     -keyout /etc/pki/tls/private/localhost.key -days 365 \
     -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
 
-# Generate OnDemand portal configuration
+# Generate OnDemand portal configuration following documentation
 RUN /opt/ood/ood-portal-generator/sbin/update_ood_portal
 
 # Copy entrypoint script

@@ -23,12 +23,36 @@ then
     echo "---> Starting SSSD..."
     rm -f /var/run/sssd.pid
     /usr/sbin/sssd -D 2>/dev/null || echo "-- SSSD failed to start, continuing"
+    
+    # Create local demo users for authentication (demo environment only)
+    echo "---> Creating demo users..."
+    for user in hpcadmin cgray sfoster csimmons astewart; do
+        if ! id "$user" &>/dev/null; then
+            useradd -m -s /bin/bash "$user"
+            echo "$user:ilovelinux" | chpasswd
+            # Set special password for cgray
+            if [ "$user" = "cgray" ]; then
+                echo "cgray:test123" | chpasswd
+            fi
+        fi
+    done
+    
+    # Create htpasswd file for Apache authentication
+    echo "---> Creating htpasswd file..."
+    touch /etc/ood/htpasswd
+    htpasswd -b /etc/ood/htpasswd hpcadmin ilovelinux
+    htpasswd -b /etc/ood/htpasswd cgray test123
+    htpasswd -b /etc/ood/htpasswd sfoster ilovelinux
+    htpasswd -b /etc/ood/htpasswd csimmons ilovelinux
+    htpasswd -b /etc/ood/htpasswd astewart ilovelinux
+    chmod 644 /etc/ood/htpasswd
 
     # Set up MUNGE permissions and start
     echo "---> Setting up MUNGE..."
-    chown -R munge:munge /var/lib/munge /var/log/munge /var/run/munge /etc/munge 2>/dev/null || true
-    chmod 755 /var/lib/munge /var/run/munge 2>/dev/null || true
-    chmod 700 /var/log/munge /etc/munge 2>/dev/null || true
+    mkdir -p /var/lib/munge /var/log/munge /var/run/munge /etc/munge
+    chown -R munge:munge /var/lib/munge /var/log/munge /var/run/munge /etc/munge
+    chmod 755 /var/lib/munge /var/run/munge
+    chmod 700 /var/log/munge /etc/munge
     
     if [ ! -f /etc/munge/munge.key ]; then
         echo "---> Generating MUNGE key..."
@@ -61,9 +85,13 @@ then
     echo "---> Updating OnDemand portal configuration..."
     /opt/ood/ood-portal-generator/sbin/update_ood_portal
 
-    # Start OnDemand Dex service (authentication)
-    echo "---> Starting OnDemand Dex..."
-    /usr/sbin/ondemand-dex serve /etc/ood/dex/config.yaml &
+    # Start OnDemand Dex service (authentication) if available
+    if [ -f /usr/sbin/ondemand-dex ] && [ -f /etc/ood/dex/config.yaml ]; then
+        echo "---> Starting OnDemand Dex..."
+        /usr/sbin/ondemand-dex serve /etc/ood/dex/config.yaml &
+    else
+        echo "---> Dex not configured, using Apache authentication instead"
+    fi
 
     # Start Apache/httpd for OnDemand
     echo "---> Starting Apache httpd for OnDemand..."

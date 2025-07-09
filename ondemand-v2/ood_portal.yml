@@ -2,6 +2,8 @@
 #
 # Configure the port for OnDemand web interface
 listen_addr_port: 3443
+port: 3443
+ssl_port: 3443
 
 # Setup SSL - use self-signed certs for demo
 ssl:
@@ -9,12 +11,12 @@ ssl:
   - "SSLCertificateKeyFile /etc/pki/tls/private/localhost.key"
   - "SSLEngine on"
 
-# Use LDAP authentication (same as SSH)
+# Use file-based authentication for demo
 auth:
   - "AuthType Basic"
   - "AuthName \"OnDemand\""
-  - "AuthBasicProvider ldap"
-  - "AuthLDAPURL ldap://ldap:389/ou=People,dc=example,dc=org?uid"
+  - "AuthBasicProvider file"
+  - "AuthUserFile /etc/ood/htpasswd"
   - "Require valid-user"
 
 # Enable host regex for development
