@@ -1,0 +1,7 @@
+---
+name: Remote Desktop
+category: Interactive Apps
+subcategory: Servers
+role: batch_connect
+description: |
+  This app will launch an XFCE desktop on one or more nodes.
