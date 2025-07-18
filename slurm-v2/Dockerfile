@@ -63,7 +63,8 @@ COPY cgroup.conf /etc/slurm/cgroup.conf
 
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY init-accounts.sh /usr/local/bin/init-accounts.sh
+RUN chmod +x /usr/local/bin/init-accounts.sh
 
 # Clean up
 WORKDIR /
