@@ -1,0 +1,31 @@
+issuer: http://127.0.0.1:5556/dex
+
+storage:
+  type: sqlite3
+  config:
+    file: /var/lib/ondemand-dex/dex.db
+
+web:
+  http: 127.0.0.1:5556
+
+telemetry:
+  http: 127.0.0.1:5558
+
+oauth2:
+  responseTypes: ["code", "token", "id_token"]
+
+staticClients:
+- id: ondemand
+  redirectURIs:
+  - 'http://localhost:3443/oidc'
+  - 'https://localhost:3443/oidc'
+  name: 'Open OnDemand'
+  secret: 83db23cc1ee19ccdae01aa20e42ec43e0792dea9872c4762e9802ef13d3a5db9
+
+enablePasswordDB: true
+
+staticPasswords:
+- email: "hpcadmin@localhost"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+  username: "hpcadmin"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"

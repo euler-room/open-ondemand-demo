@@ -126,8 +126,8 @@ then
         echo "---> Starting OnDemand Dex..."
         
         # Create the directory for dex database
-        mkdir -p /etc/ood/dex/examples
-        chown -R ondemand-dex:ondemand-dex /etc/ood/dex/examples
+        mkdir -p /var/lib/ondemand-dex
+        chown -R ondemand-dex:ondemand-dex /var/lib/ondemand-dex
         
         /usr/sbin/ondemand-dex serve /etc/ood/dex/config.yaml &
     else
