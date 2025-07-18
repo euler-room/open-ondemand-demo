@@ -43,7 +43,28 @@ log_info "Installing compute packages .."
 
 alternatives --set python3 /usr/bin/python3.9
 
+# Install desktop environments
+log_info "Installing desktop environments (Xfce and MATE).."
 dnf groupinstall -y "Xfce"
+
+# Install MATE Desktop packages
+dnf install -y \
+    mate-desktop \
+    mate-session-manager \
+    mate-panel \
+    mate-terminal \
+    mate-settings-daemon \
+    mate-control-center \
+    mate-polkit \
+    marco \
+    caja \
+    mate-notification-daemon \
+    mate-screensaver \
+    mate-menus \
+    mate-backgrounds \
+    mate-themes \
+    firefox \
+    gnome-terminal
 
 log_info "Compiling python-websockify version ${WEBSOCKIFY_VERSION}.."
 wget -O /tmp/websockify-${WEBSOCKIFY_VERSION}.tar.gz https://github.com/novnc/websockify/archive/refs/tags/v${WEBSOCKIFY_VERSION}.tar.gz
@@ -119,3 +140,9 @@ deactivate
 
 dnf clean all
 rm -rf /var/cache/dnf
+
+# Setup VNC xstartup template
+log_info "Setting up VNC xstartup template.."
+mkdir -p /etc/skel/.vnc
+cp /build/vnc_xstartup /etc/skel/.vnc/xstartup
+chmod 755 /etc/skel/.vnc/xstartup
