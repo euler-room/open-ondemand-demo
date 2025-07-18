@@ -1,0 +1,23 @@
+# Override file to add procps-ng to compute nodes
+services:
+  cpn01:
+    # Install procps-ng on startup
+    entrypoint: ["/bin/bash", "-c"]
+    command: |
+      # Install procps-ng if not already installed
+      if ! command -v pgrep &> /dev/null; then
+        dnf install -y procps-ng
+      fi
+      # Run the original entrypoint
+      exec /usr/local/bin/entrypoint.sh slurmd
+      
+  cpn02:
+    # Install procps-ng on startup
+    entrypoint: ["/bin/bash", "-c"]
+    command: |
+      # Install procps-ng if not already installed
+      if ! command -v pgrep &> /dev/null; then
+        dnf install -y procps-ng
+      fi
+      # Run the original entrypoint
+      exec /usr/local/bin/entrypoint.sh slurmd
