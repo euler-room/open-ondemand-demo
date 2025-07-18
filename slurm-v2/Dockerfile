@@ -138,3 +138,9 @@ RUN pip3 install websockify
 
 # Add TurboVNC to PATH for all users
 RUN echo 'export PATH="/opt/TurboVNC/bin:$PATH"' >> /etc/profile.d/turbovnc.sh
+
+# Install procps-ng for process management tools (pgrep, pkill)
+RUN dnf install -y procps-ng && dnf clean all
+
+# Ensure TurboVNC is in PATH for non-login shells too
+RUN echo 'export PATH="/opt/TurboVNC/bin:$PATH"' >> /etc/bashrc
