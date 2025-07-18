@@ -53,6 +53,9 @@ RUN mkdir -p /etc/pki/tls/certs /etc/pki/tls/private && \
 # Generate OnDemand portal configuration following documentation
 RUN /opt/ood/ood-portal-generator/sbin/update_ood_portal
 
+# Override bc_desktop configuration
+COPY bc_desktop_form.yml /var/www/ood/apps/sys/bc_desktop/form.yml
+
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/ondemand-entrypoint.sh
 RUN chmod +x /usr/local/bin/ondemand-entrypoint.sh

@@ -7,14 +7,16 @@ then
 
     # Configure bc_desktop app with cluster setting
     if [ -f /var/www/ood/apps/sys/bc_desktop/form.yml ]; then
-        echo "---u003e Configuring bc_desktop app..."
+        echo "---> Configuring bc_desktop app..."
         # Add cluster setting to form.yml if not present
         if ! grep -q "^cluster:" /var/www/ood/apps/sys/bc_desktop/form.yml; then
             sed -i "1i---\ncluster: \"hpc\"" /var/www/ood/apps/sys/bc_desktop/form.yml
+            echo "    - Added cluster to form.yml"
         fi
         # Also add it to submit.yml.erb if not present
         if [ -f /var/www/ood/apps/sys/bc_desktop/submit.yml.erb ] u0026u0026 ! grep -q "^cluster:" /var/www/ood/apps/sys/bc_desktop/submit.yml.erb; then
             sed -i "1a cluster: \"hpc\"" /var/www/ood/apps/sys/bc_desktop/submit.yml.erb
+            echo "    - Added cluster to submit.yml.erb"
         fi
     fi
     
@@ -148,6 +150,10 @@ then
     fi
 
     # Start Apache/httpd for OnDemand
+    # Clean up any stale nginx sockets
+    echo "---> Cleaning up stale nginx sockets..."
+    rm -rf /var/run/ondemand-nginx/*
+
     echo "---> Starting Apache httpd for OnDemand..."
     exec /usr/sbin/httpd -D FOREGROUND
 fi
