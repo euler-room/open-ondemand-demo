@@ -1,19 +1,52 @@
 #!/bin/bash
 set -e
 
-# Fix MUNGE directory permissions
-echo "Setting up MUNGE..."
-chown -R munge:munge /var/lib/munge /var/log/munge /var/run/munge /etc/munge
-chmod 755 /var/lib/munge /var/run/munge
-chmod 700 /var/log/munge /etc/munge
-
-# Initialize MUNGE if key doesn't exist
-if [ ! -f /etc/munge/munge.key ]; then
-    echo "Generating MUNGE key..."
-    /usr/sbin/create-munge-key
-    chown munge:munge /etc/munge/munge.key
-    chmod 400 /etc/munge/munge.key
-fi
+# Function to start MUNGE with retries
+start_munge() {
+    local attempt=1
+    local max_attempts=3
+    
+    echo "Setting up MUNGE..."
+    
+    while [ $attempt -le $max_attempts ]; do
+        echo "  -> Attempt $attempt to start MUNGE..."
+        
+        # Clean up any existing state
+        killall munged 2>/dev/null || true
+        rm -rf /var/run/munge /var/log/munge
+        
+        # Create directories with proper ownership
+        mkdir -p /var/lib/munge /var/log/munge /var/run/munge /etc/munge
+        chown -R munge:munge /var/lib/munge /var/log/munge /var/run/munge /etc/munge
+        chmod 755 /var/lib/munge /var/run/munge
+        chmod 700 /var/log/munge /etc/munge
+        
+        # Initialize MUNGE if key doesn't exist
+        if [ ! -f /etc/munge/munge.key ]; then
+            echo "  -> Generating MUNGE key..."
+            /usr/sbin/create-munge-key
+            chown munge:munge /etc/munge/munge.key
+            chmod 400 /etc/munge/munge.key
+        fi
+        
+        # Start MUNGE with proper user context
+        if gosu munge /usr/sbin/munged --force --syslog; then
+            sleep 2
+            # Test if MUNGE is working
+            if /usr/bin/munge -n >/dev/null 2>&1; then
+                echo "  -> MUNGE started successfully!"
+                return 0
+            fi
+        fi
+        
+        echo "  -> MUNGE failed to start on attempt $attempt"
+        attempt=$((attempt + 1))
+        sleep 2
+    done
+    
+    echo "ERROR: Failed to start MUNGE after $max_attempts attempts!"
+    return 1
+}
 
 # Set up SLURM directories and permissions
 echo "Setting up SLURM directories..."
@@ -40,9 +73,11 @@ for user in hpcadmin cgray sfoster csimmons astewart; do
     fi
 done
 
-# Start MUNGE with proper user context
-echo "Starting MUNGE..."
-gosu munge /usr/sbin/munged &
+# Start MUNGE with error handling
+if ! start_munge; then
+    echo "ERROR: MUNGE is required for Slurm operation!"
+    exit 1
+fi
 
 # Wait for MUNGE to be ready
 sleep 3
@@ -55,6 +90,10 @@ case "$1" in
         ;;
     slurmctld)
         echo "Starting slurmctld..."
+        # Run account initialization in background
+        if [ -x /usr/local/bin/init-accounts.sh ]; then
+            /usr/local/bin/init-accounts.sh &
+        fi
         exec /usr/sbin/slurmctld -D
         ;;
     slurmd)

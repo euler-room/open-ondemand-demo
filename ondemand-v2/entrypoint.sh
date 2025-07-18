@@ -47,22 +47,58 @@ then
     htpasswd -b /etc/ood/htpasswd astewart ilovelinux
     chmod 644 /etc/ood/htpasswd
 
-    # Set up MUNGE permissions and start
+    # Set up MUNGE with robust error handling
     echo "---> Setting up MUNGE..."
-    mkdir -p /var/lib/munge /var/log/munge /var/run/munge /etc/munge
-    chown -R munge:munge /var/lib/munge /var/log/munge /var/run/munge /etc/munge
-    chmod 755 /var/lib/munge /var/run/munge
-    chmod 700 /var/log/munge /etc/munge
     
-    if [ ! -f /etc/munge/munge.key ]; then
-        echo "---> Generating MUNGE key..."
-        /usr/sbin/create-munge-key
-        chown munge:munge /etc/munge/munge.key
-        chmod 400 /etc/munge/munge.key
+    # Function to start MUNGE with retries
+    start_munge() {
+        local attempt=1
+        local max_attempts=3
+        
+        while [ $attempt -le $max_attempts ]; do
+            echo "  -> Attempt $attempt to start MUNGE..."
+            
+            # Clean up any existing state
+            killall munged 2>/dev/null || true
+            rm -rf /var/run/munge /var/log/munge
+            
+            # Create directories with proper ownership
+            mkdir -p /var/lib/munge /var/log/munge /var/run/munge /etc/munge
+            chown -R munge:munge /var/lib/munge /var/log/munge /var/run/munge /etc/munge
+            chmod 755 /var/lib/munge /var/run/munge
+            chmod 700 /var/log/munge /etc/munge
+            
+            # Ensure MUNGE key exists
+            if [ ! -f /etc/munge/munge.key ]; then
+                echo "  -> Generating MUNGE key..."
+                /usr/sbin/create-munge-key
+                chown munge:munge /etc/munge/munge.key
+                chmod 400 /etc/munge/munge.key
+            fi
+            
+            # Start MUNGE daemon
+            if /usr/sbin/munged --force --syslog; then
+                sleep 2
+                # Test if MUNGE is working
+                if /usr/bin/munge -n >/dev/null 2>&1; then
+                    echo "  -> MUNGE started successfully!"
+                    return 0
+                fi
+            fi
+            
+            echo "  -> MUNGE failed to start on attempt $attempt"
+            attempt=$((attempt + 1))
+            sleep 2
+        done
+        
+        echo "ERROR: Failed to start MUNGE after $max_attempts attempts!"
+        return 1
+    }
+    
+    # Start MUNGE with error handling
+    if ! start_munge; then
+        echo "WARNING: Continuing without MUNGE..."
     fi
-    
-    echo "---> Starting MUNGE daemon..."
-    /usr/sbin/munged &
     
     # Start SSH daemon
     echo "---> Starting SSH daemon..."
@@ -88,6 +124,11 @@ then
     # Start OnDemand Dex service (authentication) if available
     if [ -f /usr/sbin/ondemand-dex ] && [ -f /etc/ood/dex/config.yaml ]; then
         echo "---> Starting OnDemand Dex..."
+        
+        # Create the directory for dex database
+        mkdir -p /etc/ood/dex/examples
+        chown -R ondemand-dex:ondemand-dex /etc/ood/dex/examples
+        
         /usr/sbin/ondemand-dex serve /etc/ood/dex/config.yaml &
     else
         echo "---> Dex not configured, using Apache authentication instead"
