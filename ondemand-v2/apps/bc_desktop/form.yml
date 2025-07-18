@@ -1,8 +1,0 @@
----
-title: "HPC Desktop"
-cluster: "hpc"
-attributes:
-  desktop: "xfce"
-  bc_account:
-      help: "You can leave this blank to use default SLURM account."
-  bc_queue: "compute"

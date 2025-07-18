@@ -37,6 +37,7 @@ COPY nginx_stage.yml /etc/ood/config/nginx_stage.yml
 COPY apps/ /var/www/ood/apps/sys/
 COPY config/ /etc/ood/config/
 COPY config/dex/config.yaml /etc/ood/dex/config.yaml
+
 RUN chown ondemand-dex:ondemand-dex /etc/ood/dex/config.yaml && chmod 600 /etc/ood/dex/config.yaml
 
 

@@ -4,6 +4,19 @@ set -e
 if [ "$1" = "serve" ]
 then
     echo "---> Starting OnDemand services..."
+
+    # Configure bc_desktop app with cluster setting
+    if [ -f /var/www/ood/apps/sys/bc_desktop/form.yml ]; then
+        echo "---u003e Configuring bc_desktop app..."
+        # Add cluster setting to form.yml if not present
+        if ! grep -q "^cluster:" /var/www/ood/apps/sys/bc_desktop/form.yml; then
+            sed -i "1i---\ncluster: \"hpc\"" /var/www/ood/apps/sys/bc_desktop/form.yml
+        fi
+        # Also add it to submit.yml.erb if not present
+        if [ -f /var/www/ood/apps/sys/bc_desktop/submit.yml.erb ] u0026u0026 ! grep -q "^cluster:" /var/www/ood/apps/sys/bc_desktop/submit.yml.erb; then
+            sed -i "1a cluster: \"hpc\"" /var/www/ood/apps/sys/bc_desktop/submit.yml.erb
+        fi
+    fi
     
     # Wait for frontend ssh (optional, non-blocking)
     echo "-- Checking for frontend ssh connection..."
