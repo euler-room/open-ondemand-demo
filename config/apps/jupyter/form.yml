@@ -1,0 +1,27 @@
+---
+cluster: "hpc"
+
+attributes:
+  modules: ""
+  extra_jupyter_args: ""
+  
+  bc_num_hours:
+    value: 1
+  bc_num_slots:
+    value: 1
+    max: 2
+  memory:
+    widget: "number_field"
+    max: 1000
+    min: 200
+    step: 200
+    value: 600
+    label: "Memory (MB)"
+    help: "RSS Memory"
+
+form:
+  - modules
+  - extra_jupyter_args
+  - memory
+  - bc_num_hours
+  - bc_num_slots
