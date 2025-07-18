@@ -71,3 +71,14 @@ WORKDIR /
 RUN rm -rf /tmp/slurm-*
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Install Jupyter for OnDemand integration
+RUN python3 -m venv /usr/local/jupyter/4.3.5 && \
+    source /usr/local/jupyter/4.3.5/bin/activate && \
+    pip install --upgrade pip && \
+    pip install jupyterlab jupyter notebook ipywidgets && \
+    deactivate
+
+# Create wrapper script for Jupyter
+RUN echo '#!/bin/bash\nsource /usr/local/jupyter/4.3.5/bin/activate\nexec "$@"' > /usr/local/jupyter/4.3.5/bin/activate-wrapper && \
+    chmod +x /usr/local/jupyter/4.3.5/bin/activate-wrapper

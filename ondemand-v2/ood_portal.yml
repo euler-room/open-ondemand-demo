@@ -1,30 +1,37 @@
 # OnDemand Portal Configuration
-#
-# Configure the port for OnDemand web interface
 listen_addr_port: 3443
 port: 3443
 ssl_port: 3443
 
-# Setup SSL - use self-signed certs for demo
+# SSL Configuration
 ssl:
-  - "SSLCertificateFile /etc/pki/tls/certs/localhost.crt"
-  - "SSLCertificateKeyFile /etc/pki/tls/private/localhost.key"
-  - "SSLEngine on"
+  - 'SSLCertificateFile /etc/pki/tls/certs/localhost.crt'
+  - 'SSLCertificateKeyFile /etc/pki/tls/private/localhost.key'
+  - 'SSLEngine on'
 
-# Use file-based authentication for demo
+# Authentication
 auth:
-  - "AuthType Basic"
-  - "AuthName \"OnDemand\""
-  - "AuthBasicProvider file"
-  - "AuthUserFile /etc/ood/htpasswd"
-  - "Require valid-user"
+  - 'AuthType Basic'
+  - 'AuthName "OnDemand"'
+  - 'AuthBasicProvider file'
+  - 'AuthUserFile /etc/ood/htpasswd'
+  - 'Require valid-user'
 
-# Enable host regex for development
-host_regex: '*'
-
-# Set servername
+# Server settings
 servername: localhost
+server_aliases: ['localhost']
 
-# Log level
-error_log_path: "/var/log/httpd/error.log"
-access_log_path: "/var/log/httpd/access.log"
+# Enable development mode settings
+development_mode: true
+
+# Lua configuration for node proxying
+lua_root: '/opt/ood/mod_ood_proxy/lib'
+lua_log_level: 'info'
+
+# Node settings for interactive apps (Jupyter, etc.)
+node_uri: '/node'
+rnode_uri: '/rnode'
+
+# Log settings
+error_log_path: '/var/log/httpd/error.log'
+access_log_path: '/var/log/httpd/access.log'
